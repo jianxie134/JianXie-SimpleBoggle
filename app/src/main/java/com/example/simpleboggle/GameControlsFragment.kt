@@ -13,9 +13,12 @@ class GameControlsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_game_controls, container, false)
-        val gameBoardFragment = fragmentManager?.findFragmentById(R.id.gameBoardContainer) as GameBoardFragment
-        val word = gameBoardFragment.getSelectedWord()
-        view.findViewById<Button>(R.id.submitButton).setOnClickListener { actionsListener?.onSubmitWord(word) }
+
+        view.findViewById<Button>(R.id.submitButton).setOnClickListener {
+            val gameBoardFragment = fragmentManager?.findFragmentById(R.id.gameBoardContainer) as GameBoardFragment
+            val word = gameBoardFragment.getSelectedWord()
+            actionsListener?.onSubmitWord(word)
+        }
         view.findViewById<Button>(R.id.clearButton).setOnClickListener { actionsListener?.onClearSelection() }
         view.findViewById<Button>(R.id.newGameButton).setOnClickListener { actionsListener?.onNewGame() }
         return view
@@ -29,19 +32,4 @@ class GameControlsFragment : Fragment() {
             throw RuntimeException("$context must implement GameActionsListener")
         }
     }
-
-//    private fun submitWord() {
-//        // Logic to collect the selected word and submit it
-//        actionsListener?.onSubmitWord(collectedWord)
-//    }
-//
-//    private fun clearSelection() {
-//        // Logic to clear the current selection
-//        actionsListener?.onClearSelection()
-//    }
-//
-//    private fun newGame() {
-//        // Logic to initialize a new game
-//        actionsListener?.onNewGame()
-//    }
 }
