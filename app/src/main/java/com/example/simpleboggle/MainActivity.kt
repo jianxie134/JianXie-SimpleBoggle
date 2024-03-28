@@ -22,6 +22,9 @@ class MainActivity : AppCompatActivity(), GameActionsListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        lifecycleScope.launch {
+            WordValidator.loadWords()
+        }
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -29,16 +32,12 @@ class MainActivity : AppCompatActivity(), GameActionsListener {
                 .add(R.id.gameControlsContainer, GameControlsFragment(), "GAME_CONTROLS_FRAGMENT")
                 .commit()
         }
-
-        // Simplified coroutine launch for loading the word list
-        lifecycleScope.launch {
-            WordValidator.loadWords()
-        }
     }
 
     override fun onSubmitWord(word: String) {
         if (submittedWords.contains(word)) {
             showToast("This word has already been submitted!")
+            onClearSelection()
             return
         }
 
@@ -59,6 +58,7 @@ class MainActivity : AppCompatActivity(), GameActionsListener {
         onClearSelection()
     }
 
+    // Clear the selection in GameBoardFragment
     override fun onClearSelection() {
         val gameBoardFragment = supportFragmentManager.findFragmentById(R.id.gameBoardContainer) as GameBoardFragment
         gameBoardFragment.clearSelections()

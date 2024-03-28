@@ -1,7 +1,6 @@
 package com.example.simpleboggle
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,23 +9,28 @@ import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
-import kotlin.math.abs
 
 class GameBoardFragment : Fragment() {
     private lateinit var gridLayout: GridLayout
     private var selectedLetters = StringBuilder()
     private var actionsListener: GameActionsListener? = null
-    private var selectedButtons = mutableListOf<Button>()
     private lateinit var selectedLettersTextView: TextView
+    // Key: Button, Value: Pair(row, column)
+    private val buttonPositions = mutableMapOf<Button, Pair<Int, Int>>()
+    // Track the last selected position
+    private var lastSelectedPosition: Pair<Int, Int>? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_game_board, container, false)
         gridLayout = view.findViewById(R.id.gameBoardGrid)
         initializeBoard()
-
+//        WordValidator.isLoaded.observe(viewLifecycleOwner) { isLoaded ->
+//            if (isLoaded) {
+//                initializeBoard()  // Now it's safe to call
+//            }
+//        }
         return view
     }
 
@@ -42,15 +46,19 @@ class GameBoardFragment : Fragment() {
     fun initializeBoard() {
         gridLayout.removeAllViews() // Clear the gridLayout
         val letters = generateRandomLetters()
-        for (i in 0 until 16) { // For a 4x4 grid
-            val button = Button(context).apply {
-                text = letters[i].toString()
-                setOnClickListener {
-                    // Handle letter selection
-                    onLetterSelected(this)
+        val gridRows = 4
+        val gridCols = 4
+        for (row in 0 until gridRows) {
+            for (col in 0 until gridCols) {
+                val button = Button(context).apply {
+                    text = letters[row * gridCols + col].toString()
+                        setOnClickListener { onLetterSelected(this) }
                 }
+                // Store the button's position
+                buttonPositions[button] = Pair(row, col)
+                // Add the button to the grid layout
+                gridLayout.addView(button)
             }
-            gridLayout.addView(button)
         }
 
         // Add the selectedLettersTextView TextView back to the gridLayout
@@ -62,6 +70,7 @@ class GameBoardFragment : Fragment() {
         gridLayout.addView(selectedLettersTextView)
     }
 
+    // Generate random letters with 8 vowels and 8 consonants
     private fun generateRandomLetters(): List<Char> {
         // This is a simplified version. Customize this method based on your game's rules.
         val vowels = "AEIOU".toList()
@@ -69,6 +78,8 @@ class GameBoardFragment : Fragment() {
         return (List(8) { vowels.random() } + List(8) { consonants.random() }).shuffled()
     }
 
+    // Generate random letters based words from the wordList
+    // App keeps crashing because of accessing the wordList before it's loaded - Solved by using LiveData but not stable
 //    private fun generateRandomLetters(): List<Char> {
 //        // Step 1: Get the word list from WordValidator
 //        val words = WordValidator.getWordList().filter { it.length <= 16 }
@@ -95,15 +106,33 @@ class GameBoardFragment : Fragment() {
 //    }
 
     private fun onLetterSelected(button: Button) {
-        // Append the letter to the selectedLetters
-        selectedLetters.append(button.text.toString())
-        selectedLettersTextView.text = selectedLetters.toString()
+        val currentPosition = buttonPositions[button]
+        if (currentPosition == null) {
+            Toast.makeText(context, "Error in button positioning", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // Change the button's appearance
-        button.apply {
-            isEnabled = false // Disable the button if re-selection isn't allowed
+        // Check if it's the first selection or if it's adjacent to the last selected letter
+        if (lastSelectedPosition == null || isAdjacent(lastSelectedPosition!!, currentPosition)) {
+            selectedLetters.append(button.text.toString())
+            selectedLettersTextView.text = selectedLetters.toString()
+
+            // Update the appearance of the selected button
+            button.isEnabled = false
+
+            // Update the last selected position
+            lastSelectedPosition = currentPosition
+        } else {
+            Toast.makeText(context, "The letter must connect to the previous one!", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun isAdjacent(lastPos: Pair<Int, Int>, currentPos: Pair<Int, Int>): Boolean {
+        val (lastRow, lastCol) = lastPos
+        val (currentRow, currentCol) = currentPos
+        return Math.abs(lastRow - currentRow) <= 1 && Math.abs(lastCol - currentCol) <= 1
+    }
+
 
     // Get the selected word
     fun getSelectedWord(): String {
