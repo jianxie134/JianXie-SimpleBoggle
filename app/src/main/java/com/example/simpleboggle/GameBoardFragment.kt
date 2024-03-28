@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 
@@ -118,7 +119,10 @@ class GameBoardFragment : Fragment() {
             selectedLettersTextView.text = selectedLetters.toString()
 
             // Update the appearance of the selected button
-            button.isEnabled = false
+            button.apply {
+                setBackgroundColor(ContextCompat.getColor(context, R.color.selectedButton))
+                isEnabled = false // Disable the button
+            }
 
             // Update the last selected position
             lastSelectedPosition = currentPosition
