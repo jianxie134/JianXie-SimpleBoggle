@@ -120,7 +120,7 @@ class GameBoardFragment : Fragment() {
 
             // Update the appearance of the selected button
             button.apply {
-                setBackgroundColor(ContextCompat.getColor(context, R.color.selectedButton))
+//                setBackgroundColor(ContextCompat.getColor(context, R.color.selectedButton))
                 isEnabled = false // Disable the button
             }
 
@@ -129,6 +129,22 @@ class GameBoardFragment : Fragment() {
         } else {
             Toast.makeText(context, "The letter must connect to the previous one!", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    fun resetButtonStates() {
+        gridLayout.children.forEach { view ->
+            if (view is Button) {
+                view.apply {
+//                    setBackgroundColor(ContextCompat.getColor(context, R.color.background)) // Replace with your default button color
+                    isEnabled = true
+                }
+            }
+        }
+//        buttonPositions.clear()
+        lastSelectedPosition = null
+
+        // Clear the selected letters
+//        selectedLetters.clear()
     }
 
     private fun isAdjacent(lastPos: Pair<Int, Int>, currentPos: Pair<Int, Int>): Boolean {

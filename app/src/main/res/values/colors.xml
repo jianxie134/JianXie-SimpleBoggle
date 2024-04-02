@@ -4,4 +4,6 @@
     <color name="white">#FFFFFFFF</color>
     <!-- light purple -->
     <color name="selectedButton">#FFD1C4E9</color>
+    <!-- light grey -->
+    <color name="background">#FFFAFAFA</color>
 </resources>
